@@ -9,7 +9,7 @@ YOUTUBE_FEEDS = [
 ]
 
 AMiAMI_SEARCH = [
-    "https://www.amiami.com/eng/c/dolls/"
+    "https://rss.app/feeds/MfP0TYG2kFEph5SC.xml"
 ]
 
 def matches(text):
