@@ -9,12 +9,15 @@ YOUTUBE_FEEDS = [
 ]
 
 AMiAMI_SEARCH = [
-    "https://rss.app/feeds/MfP0TYG2kFEph5SC.xml"
+    "https://www.amiami.com/eng/search/list/?s_keywords=kuromi"
+#    "https://rss.app/feeds/MfP0TYG2kFEph5SC.xml"
+    
 ]
 
 def matches(text):
-    text = text.lower()
-    return any(k.lower() in text for k in KEYWORDS)
+    return True
+    #   text = text.lower()
+ #   return any(k.lower() in text for k in KEYWORDS)
 
 fg = FeedGenerator()
 fg.title("pppCustom Feed")
@@ -32,20 +35,16 @@ for url in YOUTUBE_FEEDS:
             fe.description(entry.summary)
             fe.pubDate(datetime.datetime.now())
 
-# ★ AmiAmi scrape
+# ★ AmiAmi RSS (correct way)
 for url in AMiAMI_SEARCH:
-    r = requests.get(url)
-    soup = BeautifulSoup(r.text, "html.parser")
+    feed = feedparser.parse(url)
 
-    for item in soup.select(".newly-added-items__item"):
-        title = item.get_text(strip=True)
-        link = "https://www.amiami.com" + item.find("a")["href"]
-
-        if matches(title):
+    for entry in feed.entries:
+        if matches(entry.title):
             fe = fg.add_entry()
-            fe.title(title)
-            fe.link(href=link)
-            fe.description(title)
+            fe.title(entry.title)
+            fe.link(href=entry.link)
+            fe.description(entry.summary)
             fe.pubDate(datetime.datetime.now())
 
 fg.rss_file("feed.xml")
