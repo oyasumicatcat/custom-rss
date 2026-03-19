@@ -5,7 +5,7 @@ from feedgen.feed import FeedGenerator
 KEYWORDS = ["kuromi", "smart doll", "dollfie", "ドルフィー", "クロミ"]
 
 YOUTUBE_FEEDS = [
-    "https://www.youtube.com/feeds/videos.xml?channel_id=pewdiepie"
+    "https://www.youtube.com/feeds/videos.xml?channel_id=UC-lHJZR3Gqxm24_Vd_AJ5Yw"
 ]
 
 AMiAMI_SEARCH = [
