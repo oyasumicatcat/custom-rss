@@ -13,12 +13,11 @@ AMiAMI_SEARCH = [
 ]
 
 def matches(text):
-    return True
-#    text = text.lower()
-#    return any(k.lower() in text for k in KEYWORDS)
+    text = text.lower()
+    return any(k.lower() in text for k in KEYWORDS)
 
 fg = FeedGenerator()
-fg.title("ccCustom Feed")
+fg.title("dCustom Feed")
 fg.link(href="https://oyasumicatcat.github.io/custom-rss/feed.xmll")
 fg.description("Auto filtered feed")
 
