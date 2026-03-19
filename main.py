@@ -5,7 +5,7 @@ from feedgen.feed import FeedGenerator
 KEYWORDS = ["kuromi", "smart doll", "dollfie", "ドルフィー", "クロミ"]
 
 YOUTUBE_FEEDS = [
-    "https://www.youtube.com/feeds/videos.xml?channel_id=CHANNEL_ID_HERE"
+    "https://www.youtube.com/feeds/videos.xml?channel_id=pewdiepie"
 ]
 
 AMiAMI_SEARCH = [
@@ -17,7 +17,7 @@ def matches(text):
     return any(k.lower() in text for k in KEYWORDS)
 
 fg = FeedGenerator()
-fg.title("dCustom Feed")
+fg.title("yCustom Feed")
 fg.link(href="https://oyasumicatcat.github.io/custom-rss/feed.xmll")
 fg.description("Auto filtered feed")
 
