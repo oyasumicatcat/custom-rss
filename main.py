@@ -18,7 +18,7 @@ def matches(text):
 
 fg = FeedGenerator()
 fg.title("yCustom Feed")
-fg.link(href="https://oyasumicatcat.github.io/custom-rss/feed.xmll")
+fg.link(href="https://oyasumicatcat.github.io/custom-rss/feed.xml")
 fg.description("Auto filtered feed")
 
 # ★ YouTube
