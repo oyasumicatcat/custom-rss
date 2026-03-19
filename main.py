@@ -9,7 +9,7 @@ YOUTUBE_FEEDS = [
 ]
 
 AMiAMI_SEARCH = [
-    "https://www.amiami.com/eng/search/list/?s_keywords=kuromi"
+    "https://www.amiami.com/eng/c/dolls/"
 ]
 
 def matches(text):
