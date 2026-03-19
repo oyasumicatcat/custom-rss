@@ -17,7 +17,7 @@ def matches(text):
     return any(k.lower() in text for k in KEYWORDS)
 
 fg = FeedGenerator()
-fg.title("yCustom Feed")
+fg.title("pppCustom Feed")
 fg.link(href="https://oyasumicatcat.github.io/custom-rss/feed.xml")
 fg.description("Auto filtered feed")
 
