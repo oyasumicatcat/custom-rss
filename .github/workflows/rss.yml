@@ -2,18 +2,21 @@ name: Update RSS
 
 on:
   schedule:
-    - cron: "*/30 * * * *"  # every 30 min
+    - cron: "*/30 * * * *"
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Setup Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: "3.11"
 
@@ -25,8 +28,8 @@ jobs:
 
     - name: Commit feed
       run: |
-        git config --global user.name "rss-bot"
-        git config --global user.email "rss@bot.com"
+        git config user.name "rss-bot"
+        git config user.email "rss@bot.com"
         git add feed.xml
-        git commit -m "update feed" || exit 0
+        git commit -m "update feed" || echo "no changes"
         git push
