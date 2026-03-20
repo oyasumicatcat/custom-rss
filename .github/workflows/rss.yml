@@ -8,13 +8,17 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # This gives permission to push changes
     
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4  # Updated to v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}  # Explicitly use the GitHub token
       
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5  # Updated to v5
       with:
         python-version: '3.11'
         
@@ -27,9 +31,22 @@ jobs:
       run: python main.py
       
     - name: Commit and push if changed
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
+        # Check if there are changes
         git config --global user.name "RSS Bot"
         git config --global user.email "rss-bot@users.noreply.github.com"
+        
+        # Add the feed file
         git add feed.xml
-        git diff --quiet && git diff --staged --quiet || git commit -m "Auto-update RSS feed - $(date +'%Y-%m-%d %H:%M:%S')"
+        
+        # Check if there are changes to commit
+        if git diff --staged --quiet; then
+          echo "No changes to commit"
+          exit 0
+        fi
+        
+        # Commit and push
+        git commit -m "Auto-update RSS feed - $(date +'%Y-%m-%d %H:%M:%S')"
         git push
