@@ -10,17 +10,17 @@ print("🚀 Starting Multi-Source Dolls Feed")
 print("=" * 50)
 
 # ===================== CONFIGURATION =====================
-# Your keywords for filtering
 KEYWORDS = ["kuromi", "smart doll", "dollfie", "ドルフィー", "クロミ", 
-            "doll", "pulchra", "volks", "obitsu", "azone", "スーパードルフィー"]
+            "doll", "pulchra", "volks", "obitsu", "azone", "スーパードルフィー",
+            "dollfie dream", "dd", "ドルフィードリーム"]
 
 # ===================== SOURCE DEFINITIONS =====================
 SOURCES = [
-    # --- EASY: Smart Doll Shop (Product Pages) ---
+    # --- SMART DOLL (Working) ---
     {
         "name": "Smart Doll Milk",
         "url": "https://shop.smartdoll.jp/collections/filter-smart-doll-milk",
-        "type": "shopify",  # They use Shopify
+        "type": "shopify",
         "selector": ".product-item, .grid__item"
     },
     {
@@ -30,38 +30,50 @@ SOURCES = [
         "selector": ".product-item, .grid__item"
     },
     
-    # --- MEDIUM: AmiAmi (Try RSS First) ---
+    # --- X/TWITTER VIA NITTER (Working) ---
     {
-        "name": "AmiAmi Dolls RSS",
-        "url": "https://www.amiami.com/feeds/c/dolls/",
-        "type": "rss"
-    },
-    {
-        "name": "AmiAmi Volks Search RSS",
-        "url": "https://www.amiami.com/feeds/search/?s_originaltitle_id=1531",
-        "type": "rss"
-    },
-    
-    # --- HARD: X/Twitter via Nitter ---
-    {
-        "name": "Azone Official (X)",
+        "name": "Azone Official",
         "url": "https://nitter.net/doll_azone/rss",
         "type": "rss",
-        "fallback_url": "https://nitter.poast.org/doll_azone/rss"  # Backup instance
+        "fallback_urls": [
+            "https://nitter.poast.org/doll_azone/rss",
+            "https://nitter.lucabased.xyz/doll_azone/rss"
+        ]
     },
     {
-        "name": "Volks Doll (X)",
+        "name": "Volks Doll",
         "url": "https://nitter.net/volks_doll/rss",
         "type": "rss",
-        "fallback_url": "https://nitter.lucabased.xyz/volks_doll/rss"
+        "fallback_urls": [
+            "https://nitter.poast.org/volks_doll/rss",
+            "https://nitter.lucabased.xyz/volks_doll/rss"
+        ]
     },
     
-    # --- VERY HARD: Mandarake (Needs Special Handling) ---
+    # --- AMIAMI VIA FEEDER.CO (Working) ---
     {
-        "name": "Mandarake Dollfie Dream",
-        "url": "https://order.mandarake.co.jp/order/listPage/list?categoryCode=020114&keyword=%e3%83%89%e3%83%ab%e3%83%95%e3%82%a3%e3%83%bc%e3%83%89%e3%83%aa%e3%83%bc%e3%83%a0",
-        "type": "mandarake",
-        "enabled": False  # Start with this disabled until we solve it
+        "name": "AmiAmi Dolls",
+        "url": "https://feeder.co/discover/87ab14966d/amiami-com-eng-c-dolls",
+        "type": "rss",
+        "fallback_urls": []
+    },
+    {
+        "name": "AmiAmi New Items",
+        "url": "https://feeder.co/discover/c0644138e7/amiami-com-eng-c-mature-tab-1",
+        "type": "rss",
+        "fallback_urls": []
+    },
+    {
+        "name": "AmiAmi Volks Search",
+        "url": "https://feeder.co/discover/98c5a25d36/amiami-com-eng-search-list-s_originaltitle_id-1531",
+        "type": "rss",
+        "fallback_urls": []
+    },
+    {
+        "name": "AmiAmi Licca-chan",
+        "url": "https://feeder.co/discover/b59f6c870f/amiami-com-eng-search-list-s_keywords-23licca-chan-pagemax-60-s_st_list_preorder_available-1-s_st_list_backorder_available-1-s_st_list_newitem_available-1-s_st_condition_flg-1",
+        "type": "rss",
+        "fallback_urls": []
     },
 ]
 
@@ -72,18 +84,35 @@ def matches(text):
     text = text.lower()
     # Add Japanese-to-English mappings
     text = text.replace('ドルフィー', 'dollfie').replace('スーパードルフィー', 'super dollfie')
+    text = text.replace('ドルフィードリーム', 'dollfie dream')
     return any(k.lower() in text for k in KEYWORDS)
 
-def fetch_rss(url):
-    """Fetch and parse an RSS feed"""
-    try:
-        feed = feedparser.parse(url)
-        print(f"   Status: {getattr(feed, 'status', 'N/A')}")
-        print(f"   Entries: {len(feed.entries)}")
-        return feed.entries
-    except Exception as e:
-        print(f"   ❌ RSS Error: {e}")
-        return []
+def fetch_rss_with_fallbacks(url, fallback_urls=[]):
+    """Try multiple RSS URLs with detailed status"""
+    all_urls = [url] + fallback_urls
+    
+    for i, feed_url in enumerate(all_urls):
+        print(f"   Attempt {i+1}: {feed_url[:60]}...")
+        try:
+            feed = feedparser.parse(feed_url)
+            status = getattr(feed, 'status', 'N/A')
+            entries_count = len(feed.entries)
+            
+            print(f"      Status: {status}, Entries: {entries_count}")
+            
+            if entries_count > 0:
+                print(f"      ✅ Success! First item: {feed.entries[0].title[:40]}...")
+                return feed.entries
+            
+            # Check for bozo exception (parse errors)
+            if feed.bozo and hasattr(feed, 'bozo_exception'):
+                print(f"      ⚠️ Parse error: {feed.bozo_exception}")
+                
+        except Exception as e:
+            print(f"      ❌ Error: {e}")
+    
+    print(f"   ❌ All attempts failed for this source")
+    return []
 
 def fetch_shopify_page(url, selector):
     """Scrape a Shopify product page"""
@@ -114,9 +143,9 @@ def process_item(title, link, source_name):
 
 # ===================== MAIN FEED GENERATION =====================
 fg = FeedGenerator()
-fg.title("Multi-Source Dolls Feed")
+fg.title("Dolls & Friends Multi-Source Feed")
 fg.link(href="https://oyasumicatcat.github.io/custom-rss/feed.xml")
-fg.description("Combined feed from multiple doll sources")
+fg.description("Combined feed from Smart Doll, Azone, Volks, and AmiAmi via Feeder")
 fg.language('en')
 
 seen_links = set()
@@ -124,21 +153,16 @@ total_entries = 0
 
 # Process each source
 for source in SOURCES:
-    if not source.get('enabled', True):
-        print(f"\n⏭️ Skipping {source['name']} (disabled)")
-        continue
-    
     print(f"\n📍 Processing: {source['name']}")
     source_matches = 0
     
     if source['type'] == 'rss':
-        # Try main URL, then fallback
-        entries = fetch_rss(source['url'])
-        if not entries and 'fallback_url' in source:
-            print(f"   Trying fallback: {source['fallback_url']}")
-            entries = fetch_rss(source['fallback_url'])
+        entries = fetch_rss_with_fallbacks(
+            source['url'], 
+            source.get('fallback_urls', [])
+        )
         
-        for entry in entries[:20]:
+        for entry in entries[:30]:  # Limit to 30 per source
             title = entry.get('title', '')
             link = entry.get('link', '')
             if process_item(title, link, source['name']):
@@ -149,7 +173,7 @@ for source in SOURCES:
     
     elif source['type'] == 'shopify':
         items = fetch_shopify_page(source['url'], source['selector'])
-        for item in items[:15]:
+        for item in items[:20]:
             try:
                 # Find title and link
                 link_elem = item.find('a')
@@ -178,7 +202,6 @@ if total_entries > 0:
     fg.rss_file("feed.xml", pretty=True)
     print(f"\n✅ Feed saved with {total_entries} entries")
 else:
-    # Create a test entry
     fe = fg.add_entry()
     fe.title("Dolls Feed - Ready")
     fe.link(href="https://github.com/oyasumicatcat/custom-rss")
