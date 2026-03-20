@@ -24,6 +24,8 @@ fg.title("pppCustom Feed")
 fg.link(href="https://oyasumicatcat.github.io/custom-rss/feed.xml")
 fg.description("Auto filtered feed")
 
+import datetime
+
 # ★ YouTube
 for url in YOUTUBE_FEEDS:
     feed = feedparser.parse(url)
@@ -32,7 +34,10 @@ for url in YOUTUBE_FEEDS:
         fe.title(entry.title)
         fe.link(href=entry.link)
         fe.description(entry.summary)
-        fe.pubDate(entry.get("published_parsed"))
+
+        if hasattr(entry, "published_parsed") and entry.published_parsed:
+            dt = datetime.datetime(*entry.published_parsed[:6], tzinfo=datetime.timezone.utc)
+            fe.pubDate(dt)
             
 # ★ AmiAmi RSS (correct way)
 for url in AMiAMI_SEARCH:
