@@ -33,7 +33,7 @@ for url in YOUTUBE_FEEDS:
             fe.title(entry.title)
             fe.link(href=entry.link)
             fe.description(entry.summary)
-            fe.pubDate(datetime.datetime.now())
+            fe.pubDate(datetime.datetime.now(datetime.timezone.utc))
 
 # ★ AmiAmi RSS (correct way)
 for url in AMiAMI_SEARCH:
@@ -45,6 +45,6 @@ for url in AMiAMI_SEARCH:
             fe.title(entry.title)
             fe.link(href=entry.link)
             fe.description(entry.summary)
-            fe.pubDate(datetime.datetime.now())
+            fe.pubDate(datetime.datetime.now(datetime.timezone.utc))
 
 fg.rss_file("feed.xml")
