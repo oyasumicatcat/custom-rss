@@ -28,23 +28,24 @@ fg.description("Auto filtered feed")
 for url in YOUTUBE_FEEDS:
     feed = feedparser.parse(url)
     for entry in feed.entries:
-        if matches(entry.title):
-            fe = fg.add_entry()
-            fe.title(entry.title)
-            fe.link(href=entry.link)
-            fe.description(entry.summary)
-            fe.pubDate(datetime.datetime.now(datetime.timezone.utc))
-
+        fe = fg.add_entry()
+        fe.title(entry.title)
+        fe.link(href=entry.link)
+        fe.description(entry.summary)
+        fe.pubDate(entry.get("published_parsed"))
+            
 # ★ AmiAmi RSS (correct way)
 for url in AMiAMI_SEARCH:
-    feed = feedparser.parse(url)
+    r = requests.get(url)
+    soup = BeautifulSoup(r.text, "html.parser")
 
-    for entry in feed.entries:
-        if matches(entry.title):
-            fe = fg.add_entry()
-            fe.title(entry.title)
-            fe.link(href=entry.link)
-            fe.description(entry.summary)
-            fe.pubDate(datetime.datetime.now(datetime.timezone.utc))
+    for item in soup.select("li.item"):
+        title = item.get_text(strip=True)
+        link = "https://www.amiami.com" + item.find("a")["href"]
 
+        fe = fg.add_entry()
+        fe.title(title)
+        fe.link(href=link)
+        fe.description(title)
+        fe.pubDate(entry.get("published_parsed", None))
 fg.rss_file("feed.xml")
